@@ -1,0 +1,46 @@
+services:
+  service_postgres:
+    image: postgres:15.6
+    container_name: pokereco-db
+    platform: linux/x86_64
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_PASSWORD: pokereco-pass
+      POSTGRES_USER: pokereco-user
+      POSTGRES_DB: pokereco-db
+    volumes:
+      - pokereco-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pokereco-user -d pokereco-db"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - pokereco-network
+
+  service_pdadmin4:
+    image: dpage/pgadmin4:8.5
+    container_name: pokereco-pdadmin
+    platform: linux/x86_64
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@pokereco.com
+      PGADMIN_DEFAULT_PASSWORD: pokereco-pass
+    volumes:
+      - pokereco-pdadmin4-data:/var/lib/pgadmin
+    ports:
+      - "8081:80"
+    depends_on:
+      service_postgres:
+        condition: service_healthy
+    networks:
+      - pokereco-network
+
+volumes:
+  pokereco-postgres-data:
+  pokereco-pdadmin4-data:
+
+networks:
+  pokereco-network:
+    driver: bridge

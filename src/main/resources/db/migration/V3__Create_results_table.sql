@@ -1,0 +1,28 @@
+CREATE TABLE IF NOT EXISTS RESULTS (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+    my_deck INT NOT NULL,
+    opponent_deck INT NOT NULL,
+    is_first BOOLEAN NOT NULL,
+    turn_count SMALLINT NOT NULL,
+    outcome SMALLINT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_results_user FOREIGN KEY (user_id) REFERENCES TOKENS(id) ON DELETE CASCADE,
+    CONSTRAINT fk_results_my_deck FOREIGN KEY (my_deck) REFERENCES DECKS(id) ON DELETE CASCADE,
+    CONSTRAINT fk_results_opponent_deck FOREIGN KEY (opponent_deck) REFERENCES DECKS(id) ON DELETE CASCADE
+);
+
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_update_updated_at
+BEFORE UPDATE ON RESULTS
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
