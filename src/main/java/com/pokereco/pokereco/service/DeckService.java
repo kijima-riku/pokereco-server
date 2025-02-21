@@ -1,7 +1,7 @@
 package com.pokereco.pokereco.service;
 
 import com.pokereco.pokereco.dto.DecksListDto;
-import com.pokereco.pokereco.model.Decks;
+import com.pokereco.pokereco.model.Deck;
 import com.pokereco.pokereco.repository.DecksRepository;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +17,7 @@ public class DeckService {
     }
 
     public List<DecksListDto> getAllDecks() {
-        List<Decks>  decks = decksRepository.findAll();
+        List<Deck>  decks = decksRepository.findAll();
         return decks.stream().map(deck -> new DecksListDto(deck.getId(), deck.getName())).collect(Collectors.toList());
     }
 }
