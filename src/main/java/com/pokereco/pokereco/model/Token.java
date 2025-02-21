@@ -38,4 +38,5 @@ public class Token {
     public User getUser() { return user; }
     public UUID getAccessToken() { return accessToken; }
     public UUID getRefreshToken() { return refreshToken; }
+    public LocalDateTime getCreatedAt(){return createdAt;}
 }

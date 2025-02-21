@@ -1,7 +1,6 @@
 package com.pokereco.pokereco.controller;
 
 import com.pokereco.pokereco.dto.SignInDto;
-import com.pokereco.pokereco.model.Token;
 import com.pokereco.pokereco.service.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
