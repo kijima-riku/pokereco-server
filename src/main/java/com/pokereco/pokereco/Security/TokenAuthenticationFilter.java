@@ -26,7 +26,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response, final FilterChain filterChain) throws IOException, ServletException {
-        if(request.getServletPath().equals("/api/v1/auth/signIn")){
+        if(request.getServletPath().equals("/api/v1/auth/signIn") || request.getServletPath().equals("/api/v1/auth/refresh")){
             filterChain.doFilter(request, response);
             return;
         }

@@ -8,6 +8,7 @@ import com.pokereco.pokereco.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -34,6 +35,21 @@ public class AuthService {
 
         SignInDto response  = new SignInDto(token.getUser().getId(), token.getAccessToken(), token.getRefreshToken());
 
+        return response;
+    }
+
+    @Transactional
+    public SignInDto refreshToken(String refreshToken) {
+        Optional<Token> tokenOptional = tokenRepository.findByRefreshToken(UUID.fromString(refreshToken));
+        if (tokenOptional.isEmpty()) {
+            throw new IllegalArgumentException("Invalid refresh token");
+        }
+        Token token = tokenOptional.get();
+        final UUID newAccessToken = UUID.randomUUID();
+        final UUID newRefreshToken = UUID.randomUUID();
+        Token newToken = new Token(token.getUser(), newAccessToken, newRefreshToken);
+        tokenRepository.save(newToken);
+        SignInDto response = new SignInDto(token.getUser().getId(), newToken.getAccessToken(), newToken.getRefreshToken());
         return response;
     }
 }
