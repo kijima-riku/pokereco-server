@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS users (
+    id           INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_key     UUID UNIQUE NOT NULL,
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+);
