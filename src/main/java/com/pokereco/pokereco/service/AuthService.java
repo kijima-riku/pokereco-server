@@ -1,5 +1,6 @@
 package com.pokereco.pokereco.service;
 
+import com.pokereco.pokereco.dto.SignInDto;
 import com.pokereco.pokereco.model.Token;
 import com.pokereco.pokereco.model.User;
 import com.pokereco.pokereco.repository.TokenRepository;
@@ -20,7 +21,7 @@ public class AuthService {
     }
 
     @Transactional
-    public Token signIn() {
+    public SignInDto signIn() {
         UUID userKey = UUID.randomUUID();
         User user = new User(userKey);
         userRepository.save(user);
@@ -31,6 +32,8 @@ public class AuthService {
         Token token = new Token(user, accessToken, refreshToken);
         tokenRepository.save(token);
 
-        return token;
+        SignInDto response  = new SignInDto(token.getUser().getId(), token.getAccessToken(), token.getRefreshToken());
+
+        return response;
     }
 }

@@ -1,5 +1,6 @@
 package com.pokereco.pokereco.controller;
 
+import com.pokereco.pokereco.dto.SignInDto;
 import com.pokereco.pokereco.model.Token;
 import com.pokereco.pokereco.service.AuthService;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,7 @@ public class AuthController {
 
     @PostMapping("/signIn")
     public ResponseEntity<?> signIn() {
-        Token token = authService.signIn();
+        SignInDto token = authService.signIn();
         return ResponseEntity.ok().body(token);
     }
 }
