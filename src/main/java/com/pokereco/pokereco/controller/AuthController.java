@@ -16,9 +16,9 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @PostMapping("/signin")
-    public ResponseEntity<?> signin() {
-        Token token = authService.signin();
+    @PostMapping("/signIn")
+    public ResponseEntity<?> signIn() {
+        Token token = authService.signIn();
         return ResponseEntity.ok().body(token);
     }
 }

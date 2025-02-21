@@ -1,11 +1,11 @@
 INSERT INTO users (user_key) VALUES
-    ('550e8400-e29b-41d4-a716-446655440000'),
-    ('550e8400-e29b-41d4-a716-446655440001');
+    ('780f1914-87b7-4f39-8f24-350276eb2038'),
+    ('4e98dd0a-b86e-4268-8ee3-02618c45ec10');
 
 INSERT INTO tokens (user_id, access_token, refresh_token) VALUES
-    (1, 'access_token_123456', 'refresh_token_123456'),
-    (1, 'access_token_abcdef', 'refresh_token_abcdef'),
-    (2, 'access_token_xyz789', 'refresh_token_xyz789');
+    (1, 'd32ec933-4735-487d-8b83-4c90bcd0b913', 'f75da770-32ed-41d9-b4c2-e7739c471203'),
+    (1, 'd3de7110-7020-4397-a79f-1295bba1f91b', '94e1ca4f-f74f-49a4-8964-7586aec73a8e'),
+    (2, 'b50798d2-1b62-408e-8d98-b75ce83573bb', 'e74d60e0-f52f-460e-b388-4593c425ce37');
 
 INSERT INTO decks (name) VALUES
     ('クレセリア'),

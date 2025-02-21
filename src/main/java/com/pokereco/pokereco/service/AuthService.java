@@ -20,13 +20,13 @@ public class AuthService {
     }
 
     @Transactional
-    public Token signin() {
-        String userKey = UUID.randomUUID().toString();
+    public Token signIn() {
+        UUID userKey = UUID.randomUUID();
         User user = new User(userKey);
         userRepository.save(user);
 
-        String accessToken = UUID.randomUUID().toString();
-        String refreshToken = UUID.randomUUID().toString();
+        UUID accessToken = UUID.randomUUID();
+        UUID refreshToken = UUID.randomUUID();
 
         Token token = new Token(user, accessToken, refreshToken);
         tokenRepository.save(token);
