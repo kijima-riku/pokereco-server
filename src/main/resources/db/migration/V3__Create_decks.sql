@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS decks (
     id         INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name       VARCHAR(128) NOT NULL,
+    main_name       VARCHAR(128) NOT NULL,
+    sub_name    VARCHAR(128),
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );

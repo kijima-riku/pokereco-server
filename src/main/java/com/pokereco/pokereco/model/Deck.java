@@ -13,7 +13,10 @@ public class Deck {
     private Integer id;
 
     @Column(nullable = false , length = 128)
-    private String name;
+    private String mainName;
+
+    @Column(nullable = true , length = 128)
+    private String subName;
 
     @CreationTimestamp
     @Column(name = "created_at" , updatable = false)
@@ -21,15 +24,14 @@ public class Deck {
 
     public Deck() {}
 
-    public Deck(final Integer id , final String name, final LocalDateTime createdAt) {
-        this.id = id;
-        this.name = name;
-        this.createdAt = createdAt;
+    public Deck(final String mainName,final String subName) {
+        this.mainName = mainName;
+        this.subName = subName;
     }
 
     public Integer getId() {return id;}
 
-    public String getName() {return name;}
+    public String getMainName() {return mainName;}
 
-    public LocalDateTime getCreatedAt() {return createdAt;}
+    public String getSubName() {return subName;}
 }

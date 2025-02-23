@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS results (
-    id             INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    user_id        INT NOT NULL,
+    id             BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id        BIGINT NOT NULL,
     my_deck        INT NOT NULL,
     opponent_deck  INT NOT NULL,
     is_first       BOOLEAN NOT NULL,
