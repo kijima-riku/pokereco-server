@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS user_decks (
     id         INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    user_id    INT NOT NULL,
+    user_id    BIGINT NOT NULL,
     deck_id    INT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 
