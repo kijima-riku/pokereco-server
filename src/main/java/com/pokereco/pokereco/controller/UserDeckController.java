@@ -10,6 +10,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/user-decks")
@@ -33,11 +34,15 @@ public class UserDeckController {
         return userDeckService.addUserDeck(userId, dto.getDeckId());
     }
 
+    @GetMapping("/favorite")
+    public Optional<FavoriteDeck> getFavoriteDeck(@AuthenticationPrincipal CustomUserPrincipal principal){
+        Long userId = principal.getUserId();
+        return userDeckService.getFavoriteDeck(userId);
+    }
+
     @PatchMapping("/favorite")
     public FavoriteDeck setFavoriteDeck(@AuthenticationPrincipal CustomUserPrincipal principal, @RequestBody UserDeckRequestDto dto) {
         Long userId = principal.getUserId();
-        System.out.println(userId);
-        System.out.println(dto.getDeckId());
         return userDeckService.setFavoriteDeck(userId, dto.getDeckId());
     }
 
