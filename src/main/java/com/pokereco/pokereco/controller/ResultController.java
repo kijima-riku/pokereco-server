@@ -1,6 +1,7 @@
 package com.pokereco.pokereco.controller;
 
 import com.pokereco.pokereco.Security.CustomUserPrincipal;
+import com.pokereco.pokereco.dto.ResultDeckStatsDto;
 import com.pokereco.pokereco.dto.ResultRequestDto;
 import com.pokereco.pokereco.model.Result;
 import com.pokereco.pokereco.service.ResultService;
@@ -24,7 +25,12 @@ public class ResultController {
     @GetMapping
     public List<Result> getResults(@AuthenticationPrincipal CustomUserPrincipal principal, @ModelAttribute ResultRequestDto request){
         Long userId = principal.getUserId();
-        System.out.println(request.getOutcome());
         return resultService.getResults(userId, request);
+    }
+
+    @GetMapping("/decks")
+    public List<ResultDeckStatsDto> getDeckStats(@AuthenticationPrincipal CustomUserPrincipal principal) {
+        Long userId = principal.getUserId();
+        return resultService.getDeckStats(userId);
     }
 }
