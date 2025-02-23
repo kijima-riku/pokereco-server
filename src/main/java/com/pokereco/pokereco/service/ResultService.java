@@ -66,7 +66,7 @@ public class ResultService {
                 .fetch();
     }
 
-    public List<ResultDeckStatsDto>getDeckStats(Long userId) {
+    public List<ResultDeckStatsDto> getDeckStats(Long userId) {
         QResult qr = QResult.result;
         List<Tuple> deckStats = jpaQueryFactory
                 .select(qr.myDeck.id, qr.id.count(), qr.outcome.when(OUTCOME_WIN).then(1L).otherwise(0L).sum())
@@ -85,5 +85,20 @@ public class ResultService {
             response.add(new ResultDeckStatsDto(deckId, totalMatches, winRate * 100));
         }
         return response;
+    }
+
+    public ResultDeckStatsDto getOverallStats(Long userId) {
+        QResult qr = QResult.result;
+        Tuple record = jpaQueryFactory
+                .select(qr.id.count(), qr.outcome.when(OUTCOME_WIN).then(1L).otherwise(0L).sum())
+                .from(qr)
+                .where(qr.user.id.eq(userId))
+                .fetchOne();
+        Long totalMatches = record != null ? record.get(qr.id.count()) : 0L;
+        Long totalWins = record != null ? record.get(qr.outcome.when((short) 1).then(1L).otherwise(0L).sum()) : 0L;
+        totalMatches = (totalMatches != null) ? totalMatches : 0L;
+        totalWins = (totalWins != null) ? totalWins : 0L;
+        double winRate = (totalMatches > 0 ? (double) totalWins / totalMatches : 0.0);
+        return new ResultDeckStatsDto(null, totalMatches, winRate * 100);
     }
 }

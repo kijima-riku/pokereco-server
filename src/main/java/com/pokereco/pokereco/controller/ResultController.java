@@ -33,4 +33,10 @@ public class ResultController {
         Long userId = principal.getUserId();
         return resultService.getDeckStats(userId);
     }
+
+    @GetMapping("/overall")
+    public ResultDeckStatsDto getOverallStats(@AuthenticationPrincipal CustomUserPrincipal principal) {
+        Long userId = principal.getUserId();
+        return resultService.getOverallStats(userId);
+    }
 }
