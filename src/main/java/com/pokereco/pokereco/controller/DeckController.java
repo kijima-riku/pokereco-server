@@ -1,10 +1,9 @@
 package com.pokereco.pokereco.controller;
 
-import com.pokereco.pokereco.dto.DecksListDto;
+import com.pokereco.pokereco.dto.DeckDto;
+import com.pokereco.pokereco.dto.DeckRequestDto;
 import com.pokereco.pokereco.service.DeckService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -17,8 +16,13 @@ public class DeckController {
         this.deckService = deckService;
     }
 
-    @GetMapping("/list")
-    public List<DecksListDto> getDeckList() {
+    @GetMapping
+    public List<DeckDto> getDeckList() {
         return  deckService.getAllDecks();
+    }
+
+    @PostMapping
+    public DeckDto createDeck(@RequestBody DeckRequestDto request) {
+        return deckService.createDeck(request);
     }
 }
