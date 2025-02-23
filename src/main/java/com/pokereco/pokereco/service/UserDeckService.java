@@ -40,9 +40,13 @@ public class UserDeckService {
         return userDeckRepository.save(userDeck);
     }
 
+    public Optional<FavoriteDeck> getFavoriteDeck(Long userId){
+        Optional<FavoriteDeck> favoriteDeck = favoriteDeckRepository.findByUserId(userId);
+        return favoriteDeck.isPresent() ? favoriteDeck : null;
+    }
+
     public FavoriteDeck setFavoriteDeck(Long userId, Integer deckId) {
         Optional<FavoriteDeck>  favoriteDeck = favoriteDeckRepository.findByUserId(userId);
-        System.out.println(favoriteDeck.get().getCreatedAt());
         if (favoriteDeck.isPresent()) {
             FavoriteDeck updateFavoriteDeck = favoriteDeck.get();
             updateFavoriteDeck.setDeckId(deckId);
