@@ -50,9 +50,12 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
+        Long userId = token.get().getUser().getId();
+        CustomUserPrincipal principal = new CustomUserPrincipal(userId);
+
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(
-                        accessToken,
+                        principal,
                         null,
                         Collections.emptyList()
                 );
