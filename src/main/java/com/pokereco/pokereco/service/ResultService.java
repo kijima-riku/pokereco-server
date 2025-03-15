@@ -1,12 +1,16 @@
 package com.pokereco.pokereco.service;
 
 import com.pokereco.pokereco.dto.ResultDeckStatsDto;
+import com.pokereco.pokereco.dto.ResultPostRequestDto;
+import com.pokereco.pokereco.dto.ResultPostResponseDto;
 import com.pokereco.pokereco.dto.ResultRequestDto;
 import com.pokereco.pokereco.model.Deck;
 import com.pokereco.pokereco.model.QResult;
 import com.pokereco.pokereco.model.Result;
+import com.pokereco.pokereco.model.User;
 import com.pokereco.pokereco.repository.DeckRepository;
 import com.pokereco.pokereco.repository.ResultRepository;
+import com.pokereco.pokereco.repository.UserRepository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -23,13 +27,15 @@ public class ResultService {
     private final JPAQueryFactory jpaQueryFactory;
     private final ResultRepository resultRepository;
     private final DeckRepository deckRepository;
+    private final UserRepository userRepository;
     private final int DEFAULT_LIMIT = 15;
     private final short OUTCOME_WIN = 1;
 
-    public ResultService(final JPAQueryFactory jpaQueryFactory, final ResultRepository resultRepository, final DeckRepository deckRepository) {
+    public ResultService(final JPAQueryFactory jpaQueryFactory, final ResultRepository resultRepository, final DeckRepository deckRepository, final UserRepository userRepository) {
         this.jpaQueryFactory = jpaQueryFactory;
         this.resultRepository = resultRepository;
         this.deckRepository = deckRepository;
+        this.userRepository = userRepository;
     }
 
     public List<Result> getResults(Long userId, ResultRequestDto request){
@@ -85,6 +91,17 @@ public class ResultService {
         double winRate = (totalMatches > 0 ? (double) totalWins / totalMatches : 0.0);
         ResultDeckStatsDto bestDeckStats = getBestWinRateDeck(userId);
         return new ResultDeckStatsDto(totalMatches, winRate * 100, bestDeckStats.getDeckId(), bestDeckStats.getWinRate());
+    }
+
+    public ResultPostResponseDto postResult(Long userId, ResultPostRequestDto request){
+        User user = userRepository.getReferenceById(userId);
+        Deck myDeck = deckRepository.getReferenceById(request.getMyDeck());
+        Deck opponentDeck = deckRepository.getReferenceById(request.getOpponentDeck());
+
+        Result result = new Result(user, myDeck, opponentDeck, request.isIsFirst(), request.getTurnCount(), request.getOutcome());
+        Result savedResult = resultRepository.save(result);
+        return new ResultPostResponseDto(savedResult.getId(), savedResult.getMyDeck().getId(), savedResult.getOpponentDeck().getId(), savedResult.isFirst(), savedResult.getTurnCount(), savedResult.getOutcome());
+
     }
 
     private List<ResultDeckStatsDto> getDeckStatsQuery(Long userId, boolean singleBestDeck) {
