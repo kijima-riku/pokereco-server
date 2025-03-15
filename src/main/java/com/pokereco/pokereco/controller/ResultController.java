@@ -2,14 +2,13 @@ package com.pokereco.pokereco.controller;
 
 import com.pokereco.pokereco.Security.CustomUserPrincipal;
 import com.pokereco.pokereco.dto.ResultDeckStatsDto;
+import com.pokereco.pokereco.dto.ResultPostRequestDto;
+import com.pokereco.pokereco.dto.ResultPostResponseDto;
 import com.pokereco.pokereco.dto.ResultRequestDto;
 import com.pokereco.pokereco.model.Result;
 import com.pokereco.pokereco.service.ResultService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -38,5 +37,11 @@ public class ResultController {
     public ResultDeckStatsDto getOverallStats(@AuthenticationPrincipal CustomUserPrincipal principal) {
         Long userId = principal.getUserId();
         return resultService.getOverallStats(userId);
+    }
+
+    @PostMapping
+    public ResultPostResponseDto postResult (@AuthenticationPrincipal CustomUserPrincipal principal, @RequestBody ResultPostRequestDto request) {
+        Long userId = principal.getUserId();
+        return resultService.postResult(userId, request);
     }
 }
