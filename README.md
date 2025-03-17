@@ -3,7 +3,7 @@
 ## 🚀 Overview
 This is a server-side project built using **Spring Boot**. The project is containerized with **Docker Compose**, which sets up a PostgreSQL database and **pgAdmin** for database management.
 
-## 📦 Setup & Running the Project
+## 📦 Setup & Running the Project　
 
 ### 1️⃣ Start Database Containers
 The project includes a `docker-compose.yml` file at the top level. To start the required services (**PostgreSQL & pgAdmin**), run:
