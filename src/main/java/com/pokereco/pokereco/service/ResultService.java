@@ -1,5 +1,6 @@
 package com.pokereco.pokereco.service;
 
+import com.pokereco.pokereco.dto.MatchDto;
 import com.pokereco.pokereco.dto.ResultDeckStatsDto;
 import com.pokereco.pokereco.dto.ResultPostRequestDto;
 import com.pokereco.pokereco.dto.ResultPostResponseDto;
@@ -38,12 +39,11 @@ public class ResultService {
         this.userRepository = userRepository;
     }
 
-    public List<Result> getResults(Long userId, ResultRequestDto request){
+    public List<MatchDto> getResults(Long userId, ResultRequestDto request){
         final QResult qr = QResult.result;
         final BooleanBuilder predicate = new BooleanBuilder();
         predicate.and(qr.user.id.eq(userId));
 
-        System.out.println(request.getOutcome());
         if (request.getDeckId() != null) {
             Optional<Deck> myDeck = deckRepository.findById(request.getDeckId());
             myDeck.ifPresent(deck -> predicate.and(qr.myDeck.eq(deck)));
@@ -65,12 +65,14 @@ public class ResultService {
             predicate.and(qr.createdAt.loe(LocalDate.parse(request.getEndDate()).atTime(23, 59, 59)));
         }
 
-        return jpaQueryFactory.selectFrom(qr)
+        final List<Result> resultModels = jpaQueryFactory.selectFrom(qr)
                 .where(predicate)
                 .orderBy(qr.createdAt.desc())
                 .limit(Optional.ofNullable(request.getLimit()).orElse(DEFAULT_LIMIT))
                 .offset(Optional.ofNullable(request.getPage()).map(p -> (p - 1) * request.getLimit()).orElse(0))
                 .fetch();
+        final List<MatchDto> response = resultModels.stream().map(r -> new MatchDto(r.getId(), r.getUser().getId(), r.getMyDeck(), r.getOpponentDeck(), r.isFirst(), r.getTurnCount(), r.getOutcome(), r.getCreatedAt())).toList();
+        return response;
     }
 
     public List<ResultDeckStatsDto> getDeckStats(Long userId) {
