@@ -99,23 +99,49 @@ public class ResultService {
     return getDeckStatsQuery(userId, false);
   }
 
-  public ResultDeckStatsDto getOverallStats(Long userId) {
-    QResult qr = QResult.result;
+  public ResultDeckStatsDto getOverallStats(Long userId, ResultRequestDto request) {
+    final QResult qr = QResult.result;
+    final BooleanBuilder predicate = new BooleanBuilder();
+    predicate.and(qr.user.id.eq(userId));
+
+    if (request.getDeckId() != null) {
+      Optional<Deck> myDeck = deckRepository.findById(request.getDeckId());
+      myDeck.ifPresent(deck -> predicate.and(qr.myDeck.eq(deck)));
+    }
+    if (request.getOpponentDeckId() != null) {
+      Optional<Deck> opponentDeck = deckRepository.findById(request.getOpponentDeckId());
+      opponentDeck.ifPresent(deck -> predicate.and(qr.opponentDeck.eq(deck)));
+    }
+    if (request.getOutcome() != null) {
+      predicate.and(qr.outcome.eq(request.getOutcome()));
+    }
+    if (request.getIsFirst() != null) {
+      predicate.and(qr.isFirst.eq(request.getIsFirst()));
+    }
+    if (request.getStartDate() != null) {
+      predicate.and(qr.createdAt.goe(LocalDate.parse(request.getStartDate()).atStartOfDay()));
+    }
+    if (request.getEndDate() != null) {
+      predicate.and(qr.createdAt.loe(LocalDate.parse(request.getEndDate()).atTime(23, 59, 59)));
+    }
+    System.out.println(predicate + "predicate");
     Tuple record =
         jpaQueryFactory
             .select(qr.id.count(), qr.outcome.when(OUTCOME_WIN).then(1L).otherwise(0L).sum())
             .from(qr)
             .where(qr.user.id.eq(userId))
+            .where(predicate)
             .fetchOne();
     Long totalMatches = record != null ? record.get(qr.id.count()) : 0L;
     Long totalWins =
         record != null ? record.get(qr.outcome.when((short) 1).then(1L).otherwise(0L).sum()) : 0L;
+    System.out.println(totalWins + " totalWins");
     totalMatches = (totalMatches != null) ? totalMatches : 0L;
     totalWins = (totalWins != null) ? totalWins : 0L;
     double winRate = (totalMatches > 0 ? (double) totalWins / totalMatches : 0.0);
     ResultDeckStatsDto bestDeckStats = getBestWinRateDeck(userId);
     return new ResultDeckStatsDto(
-        totalMatches, winRate * 100, bestDeckStats.getDeckId(), bestDeckStats.getWinRate());
+        totalMatches, winRate * 100, bestDeckStats.getBestDeckId(), bestDeckStats.getWinRate());
   }
 
   public ResultPostResponseDto postResult(Long userId, ResultPostRequestDto request) {
@@ -176,6 +202,12 @@ public class ResultService {
 
   private ResultDeckStatsDto getBestWinRateDeck(Long userId) {
     List<ResultDeckStatsDto> bestDeckStats = getDeckStatsQuery(userId, true);
-    return bestDeckStats.isEmpty() ? new ResultDeckStatsDto(null, 0L, 0.0) : bestDeckStats.get(0);
+    if (bestDeckStats.isEmpty()) {
+      return new ResultDeckStatsDto(0L, 0.0, null, 0.0);
+    } else {
+      ResultDeckStatsDto dto = bestDeckStats.get(0);
+      return new ResultDeckStatsDto(
+          dto.getTotalMatches(), dto.getWinRate(), dto.getDeckId(), dto.getWinRate());
+    }
   }
 }

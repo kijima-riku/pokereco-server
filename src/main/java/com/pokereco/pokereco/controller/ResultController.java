@@ -21,7 +21,8 @@ public class ResultController {
   private final ResultService resultService;
   private final ResponseBuilder responseBuilder;
 
-  public ResultController(final ResultService resultService, final ResponseBuilder responseBuilder) {
+  public ResultController(
+      final ResultService resultService, final ResponseBuilder responseBuilder) {
     this.resultService = resultService;
     this.responseBuilder = responseBuilder;
   }
@@ -35,7 +36,8 @@ public class ResultController {
       List<MatchDto> results = resultService.getResults(userId, request);
       return responseBuilder.buildSuccessResponse(results);
     } catch (Exception e) {
-      return responseBuilder.buildErrorResponse("Failed to get results: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+      return responseBuilder.buildErrorResponse(
+          "Failed to get results: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -46,18 +48,23 @@ public class ResultController {
       List<ResultDeckStatsDto> deckStats = resultService.getDeckStats(userId);
       return responseBuilder.buildSuccessResponse(deckStats);
     } catch (Exception e) {
-      return responseBuilder.buildErrorResponse("Failed to get deck stats: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+      return responseBuilder.buildErrorResponse(
+          "Failed to get deck stats: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   @GetMapping("/overall")
-  public ResponseEntity<?> getOverallStats(@AuthenticationPrincipal CustomUserPrincipal principal) {
+  public ResponseEntity<?> getOverallStats(
+      @AuthenticationPrincipal CustomUserPrincipal principal,
+      @ModelAttribute ResultRequestDto request) {
+    System.out.println(request.getOutcome());
     try {
       Long userId = principal.getUserId();
-      ResultDeckStatsDto overallStats = resultService.getOverallStats(userId);
+      ResultDeckStatsDto overallStats = resultService.getOverallStats(userId, request);
       return responseBuilder.buildSuccessResponse(overallStats);
     } catch (Exception e) {
-      return responseBuilder.buildErrorResponse("Failed to get overall stats: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+      return responseBuilder.buildErrorResponse(
+          "Failed to get overall stats: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -70,7 +77,8 @@ public class ResultController {
       ResultPostResponseDto result = resultService.postResult(userId, request);
       return responseBuilder.buildSuccessResponse(result);
     } catch (Exception e) {
-      return responseBuilder.buildErrorResponse("Failed to post result: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+      return responseBuilder.buildErrorResponse(
+          "Failed to post result: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

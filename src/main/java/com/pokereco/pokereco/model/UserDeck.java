@@ -1,9 +1,8 @@
 package com.pokereco.pokereco.model;
 
 import jakarta.persistence.*;
+import java.util.Date;
 import org.hibernate.annotations.CreationTimestamp;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "user_decks")
@@ -20,7 +19,7 @@ public class UserDeck {
 
   @CreationTimestamp
   @Column(name = "created_at", updatable = false)
-  private LocalDateTime createdAt;
+  private Date createdAt;
 
   public UserDeck() {}
 
@@ -39,5 +38,9 @@ public class UserDeck {
 
   public Integer getDeckId() {
     return deckId;
+  }
+
+  public Date getCreatedAt(){
+    return createdAt;
   }
 }
