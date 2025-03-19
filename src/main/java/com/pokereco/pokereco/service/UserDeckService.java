@@ -43,8 +43,7 @@ public class UserDeckService {
   }
 
   public Optional<FavoriteDeck> getFavoriteDeck(Long userId) {
-    Optional<FavoriteDeck> favoriteDeck = favoriteDeckRepository.findByUserId(userId);
-    return favoriteDeck.isPresent() ? favoriteDeck : null;
+    return favoriteDeckRepository.findByUserId(userId);
   }
 
   public FavoriteDeck setFavoriteDeck(Long userId, Integer deckId) {
