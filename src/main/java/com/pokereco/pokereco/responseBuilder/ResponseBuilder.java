@@ -21,7 +21,7 @@ public class ResponseBuilder {
   // エラーレスポンス
   public ResponseEntity<Map<String, Object>> buildErrorResponse(String message, HttpStatus status) {
     Map<String, Object> responseBody = new LinkedHashMap<>();
-    responseBody.put("data", message);
+    responseBody.put("message", message);
 
     return new ResponseEntity<>(responseBody, status);
   }

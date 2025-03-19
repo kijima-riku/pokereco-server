@@ -1,5 +1,6 @@
 package com.pokereco.pokereco.Security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pokereco.pokereco.model.Token;
 import com.pokereco.pokereco.repository.TokenRepository;
 import jakarta.servlet.FilterChain;
@@ -13,12 +14,14 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
   private final TokenRepository tokenRepository;
-  final Integer ACCESS_TOKEN_EXPIRATION = 15;
+  private static final Integer ACCESS_TOKEN_EXPIRATION = 15;
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
   public TokenAuthenticationFilter(final TokenRepository tokenRepository) {
     this.tokenRepository = tokenRepository;
@@ -35,17 +38,18 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
       filterChain.doFilter(request, response);
       return;
     }
+
     UUID accessToken = getAccessTokenFromRequest(request);
     if (accessToken == null) {
-      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-      response.getWriter().write("Missing Authorization Header.");
+      System.out.println("access_toekn" + accessToken);
+      System.out.println(request);
+      writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "invalid token.");
       return;
     }
 
     Optional<Token> token = tokenRepository.findByAccessToken(accessToken);
     if (token.isEmpty()) {
-      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-      response.getWriter().write("Invalid access token");
+      writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid access token.");
       return;
     }
 
@@ -54,14 +58,15 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         .getCreatedAt()
         .plusMinutes(ACCESS_TOKEN_EXPIRATION)
         .isBefore(LocalDateTime.now())) {
-      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-      response.getWriter().write("Access token expired. Please refresh token.");
+      writeErrorResponse(
+          response,
+          HttpServletResponse.SC_UNAUTHORIZED,
+          "Access token expired. Please refresh token.");
       return;
     }
 
     Long userId = token.get().getUser().getId();
     CustomUserPrincipal principal = new CustomUserPrincipal(userId);
-
     UsernamePasswordAuthenticationToken authentication =
         new UsernamePasswordAuthenticationToken(principal, null, Collections.emptyList());
     SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -73,6 +78,24 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     if (bearerToken == null) {
       return null;
     }
-    return UUID.fromString(bearerToken);
+    if (bearerToken.startsWith("Bearer")) {
+      bearerToken = bearerToken.substring(7);
+    }
+    try {
+      return UUID.fromString(bearerToken);
+    } catch (IllegalArgumentException e) {
+      return null;
+    }
+  }
+
+  private void writeErrorResponse(HttpServletResponse response, int status, String message)
+      throws IOException {
+    response.setStatus(status);
+    response.setContentType("application/json");
+    response.setCharacterEncoding("UTF-8");
+    Map<String, String> errorBody = Collections.singletonMap("message", message);
+    String json = objectMapper.writeValueAsString(errorBody);
+    response.getWriter().write(json);
+    response.getWriter().flush();
   }
 }

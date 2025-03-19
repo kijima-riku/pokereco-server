@@ -33,10 +33,7 @@ public class AuthService {
     Token token = new Token(user, accessToken, refreshToken);
     tokenRepository.save(token);
 
-    SignInDto response =
-        new SignInDto(token.getUser().getId(), token.getAccessToken(), token.getRefreshToken());
-
-    return response;
+    return new SignInDto(token.getUser().getId(), token.getAccessToken(), token.getRefreshToken());
   }
 
   @Transactional
@@ -51,9 +48,7 @@ public class AuthService {
     final UUID newRefreshToken = UUID.randomUUID();
     Token newToken = new Token(token.getUser(), newAccessToken, newRefreshToken);
     tokenRepository.save(newToken);
-    SignInDto response =
-        new SignInDto(
-            token.getUser().getId(), newToken.getAccessToken(), newToken.getRefreshToken());
-    return response;
+    return new SignInDto(
+        token.getUser().getId(), newToken.getAccessToken(), newToken.getRefreshToken());
   }
 }
