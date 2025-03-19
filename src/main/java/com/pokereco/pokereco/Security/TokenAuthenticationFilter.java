@@ -5,6 +5,7 @@ import com.pokereco.pokereco.model.Token;
 import com.pokereco.pokereco.repository.TokenRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -39,7 +40,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
       return;
     }
 
-    UUID accessToken = getAccessTokenFromRequest(request);
+    UUID accessToken = getAccessTokenFromCookie(request);
     if (accessToken == null) {
       System.out.println("access_toekn" + accessToken);
       System.out.println(request);
@@ -73,19 +74,19 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     filterChain.doFilter(request, response);
   }
 
-  private UUID getAccessTokenFromRequest(final HttpServletRequest request) {
-    String bearerToken = request.getHeader("Authorization");
-    if (bearerToken == null) {
-      return null;
+  private UUID getAccessTokenFromCookie(final HttpServletRequest request) {
+    if (request.getCookies() != null) {
+      for (Cookie cookie : request.getCookies()) {
+        if ("accessToken".equals(cookie.getName())) {
+          try {
+            return UUID.fromString(cookie.getValue());
+          } catch (IllegalArgumentException e) {
+            return null;
+          }
+        }
+      }
     }
-    if (bearerToken.startsWith("Bearer")) {
-      bearerToken = bearerToken.substring(7);
-    }
-    try {
-      return UUID.fromString(bearerToken);
-    } catch (IllegalArgumentException e) {
-      return null;
-    }
+    return null;
   }
 
   private void writeErrorResponse(HttpServletResponse response, int status, String message)
