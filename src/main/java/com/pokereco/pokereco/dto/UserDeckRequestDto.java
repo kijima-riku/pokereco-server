@@ -1,7 +1,9 @@
 package com.pokereco.pokereco.dto;
 
 public class UserDeckRequestDto {
-    private Integer deckId;
+  private Integer deckId;
 
-    public Integer getDeckId(){return deckId;}
+  public Integer getDeckId() {
+    return deckId;
+  }
 }

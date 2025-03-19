@@ -15,33 +15,39 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/results")
 public class ResultController {
-    private final ResultService resultService;
+  private final ResultService resultService;
 
-    public ResultController (final ResultService resultService) {
-        this.resultService = resultService;
-    }
+  public ResultController(final ResultService resultService) {
+    this.resultService = resultService;
+  }
 
-    @GetMapping
-    public List<MatchDto> getResults(@AuthenticationPrincipal CustomUserPrincipal principal, @ModelAttribute ResultRequestDto request){
-        Long userId = principal.getUserId();
-        return resultService.getResults(userId, request);
-    }
+  @GetMapping
+  public List<MatchDto> getResults(
+      @AuthenticationPrincipal CustomUserPrincipal principal,
+      @ModelAttribute ResultRequestDto request) {
+    Long userId = principal.getUserId();
+    return resultService.getResults(userId, request);
+  }
 
-    @GetMapping("/decks")
-    public List<ResultDeckStatsDto> getDeckStats(@AuthenticationPrincipal CustomUserPrincipal principal) {
-        Long userId = principal.getUserId();
-        return resultService.getDeckStats(userId);
-    }
+  @GetMapping("/decks")
+  public List<ResultDeckStatsDto> getDeckStats(
+      @AuthenticationPrincipal CustomUserPrincipal principal) {
+    Long userId = principal.getUserId();
+    return resultService.getDeckStats(userId);
+  }
 
-    @GetMapping("/overall")
-    public ResultDeckStatsDto getOverallStats(@AuthenticationPrincipal CustomUserPrincipal principal) {
-        Long userId = principal.getUserId();
-        return resultService.getOverallStats(userId);
-    }
+  @GetMapping("/overall")
+  public ResultDeckStatsDto getOverallStats(
+      @AuthenticationPrincipal CustomUserPrincipal principal) {
+    Long userId = principal.getUserId();
+    return resultService.getOverallStats(userId);
+  }
 
-    @PostMapping
-    public ResultPostResponseDto postResult (@AuthenticationPrincipal CustomUserPrincipal principal, @RequestBody ResultPostRequestDto request) {
-        Long userId = principal.getUserId();
-        return resultService.postResult(userId, request);
-    }
+  @PostMapping
+  public ResultPostResponseDto postResult(
+      @AuthenticationPrincipal CustomUserPrincipal principal,
+      @RequestBody ResultPostRequestDto request) {
+    Long userId = principal.getUserId();
+    return resultService.postResult(userId, request);
+  }
 }

@@ -17,57 +17,62 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
-    private final TokenRepository tokenRepository;
-    final Integer ACCESS_TOKEN_EXPIRATION = 15;
+  private final TokenRepository tokenRepository;
+  final Integer ACCESS_TOKEN_EXPIRATION = 15;
 
-    public TokenAuthenticationFilter(final TokenRepository tokenRepository) {
-        this.tokenRepository = tokenRepository;
+  public TokenAuthenticationFilter(final TokenRepository tokenRepository) {
+    this.tokenRepository = tokenRepository;
+  }
+
+  @Override
+  protected void doFilterInternal(
+      final HttpServletRequest request,
+      final HttpServletResponse response,
+      final FilterChain filterChain)
+      throws IOException, ServletException {
+    if (request.getServletPath().equals("/api/v1/auth/signIn")
+        || request.getServletPath().equals("/api/v1/auth/refresh")) {
+      filterChain.doFilter(request, response);
+      return;
+    }
+    UUID accessToken = getAccessTokenFromRequest(request);
+    if (accessToken == null) {
+      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+      response.getWriter().write("Missing Authorization Header.");
+      return;
     }
 
-    @Override
-    protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response, final FilterChain filterChain) throws IOException, ServletException {
-        if(request.getServletPath().equals("/api/v1/auth/signIn") || request.getServletPath().equals("/api/v1/auth/refresh")){
-            filterChain.doFilter(request, response);
-            return;
-        }
-        UUID accessToken = getAccessTokenFromRequest(request);
-        if (accessToken == null) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Missing Authorization Header.");
-            return;
-        }
-
-        Optional<Token> token = tokenRepository.findByAccessToken(accessToken);
-        if(token.isEmpty()){
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Invalid access token");
-            return;
-        }
-
-        if(token.get().getCreatedAt().plusMinutes(ACCESS_TOKEN_EXPIRATION).isBefore(LocalDateTime.now())){
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Access token expired. Please refresh token.");
-            return;
-        }
-
-        Long userId = token.get().getUser().getId();
-        CustomUserPrincipal principal = new CustomUserPrincipal(userId);
-
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(
-                        principal,
-                        null,
-                        Collections.emptyList()
-                );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-            filterChain.doFilter(request, response);
+    Optional<Token> token = tokenRepository.findByAccessToken(accessToken);
+    if (token.isEmpty()) {
+      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+      response.getWriter().write("Invalid access token");
+      return;
     }
 
-    private UUID getAccessTokenFromRequest(final HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (bearerToken == null){
-            return null;
-        }
-        return UUID.fromString(bearerToken);
+    if (token
+        .get()
+        .getCreatedAt()
+        .plusMinutes(ACCESS_TOKEN_EXPIRATION)
+        .isBefore(LocalDateTime.now())) {
+      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+      response.getWriter().write("Access token expired. Please refresh token.");
+      return;
     }
+
+    Long userId = token.get().getUser().getId();
+    CustomUserPrincipal principal = new CustomUserPrincipal(userId);
+
+    UsernamePasswordAuthenticationToken authentication =
+        new UsernamePasswordAuthenticationToken(principal, null, Collections.emptyList());
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+    filterChain.doFilter(request, response);
+  }
+
+  private UUID getAccessTokenFromRequest(final HttpServletRequest request) {
+    String bearerToken = request.getHeader("Authorization");
+    if (bearerToken == null) {
+      return null;
+    }
+    return UUID.fromString(bearerToken);
+  }
 }

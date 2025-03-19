@@ -9,6 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface UserDeckRepository extends JpaRepository<UserDeck, Integer> {
-    List<UserDeck> findByUserId(Long userId);
-    Optional<UserDeck> findByUserIdAndDeckId(Long userId, Integer deckId);
+  List<UserDeck> findByUserId(Long userId);
+
+  Optional<UserDeck> findByUserIdAndDeckId(Long userId, Integer deckId);
 }

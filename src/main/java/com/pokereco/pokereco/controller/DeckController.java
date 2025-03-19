@@ -10,19 +10,19 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/deck")
 public class DeckController {
-    private final DeckService deckService;
+  private final DeckService deckService;
 
-    public DeckController(final DeckService deckService){
-        this.deckService = deckService;
-    }
+  public DeckController(final DeckService deckService) {
+    this.deckService = deckService;
+  }
 
-    @GetMapping
-    public List<DeckDto> getDeckList() {
-        return  deckService.getAllDecks();
-    }
+  @GetMapping
+  public List<DeckDto> getDeckList() {
+    return deckService.getAllDecks();
+  }
 
-    @PostMapping
-    public DeckDto createDeck(@RequestBody DeckRequestDto request) {
-        return deckService.createDeck(request);
-    }
+  @PostMapping
+  public DeckDto createDeck(@RequestBody DeckRequestDto request) {
+    return deckService.createDeck(request);
+  }
 }

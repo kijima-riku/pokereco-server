@@ -11,25 +11,25 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {
-    private final AuthService authService;
+  private final AuthService authService;
 
-    public AuthController(final AuthService authService) {
-        this.authService = authService;
-    }
+  public AuthController(final AuthService authService) {
+    this.authService = authService;
+  }
 
-    @PostMapping("/signIn")
-    public ResponseEntity<?> signIn() {
-        SignInDto token = authService.signIn();
-        return ResponseEntity.ok().body(token);
-    }
+  @PostMapping("/signIn")
+  public ResponseEntity<?> signIn() {
+    SignInDto token = authService.signIn();
+    return ResponseEntity.ok().body(token);
+  }
 
-    @PostMapping("/refresh")
-    public ResponseEntity<?> refreshToken(@RequestHeader("Authorization") String refreshToken){
-        System.out.println("refreshToken"+refreshToken);
-        if(refreshToken.startsWith("Bearer")){
-            refreshToken = refreshToken.substring(7);
-        }
-        SignInDto token = authService.refreshToken(refreshToken);
-        return ResponseEntity.ok().body(token);
+  @PostMapping("/refresh")
+  public ResponseEntity<?> refreshToken(@RequestHeader("Authorization") String refreshToken) {
+    System.out.println("refreshToken" + refreshToken);
+    if (refreshToken.startsWith("Bearer")) {
+      refreshToken = refreshToken.substring(7);
     }
+    SignInDto token = authService.refreshToken(refreshToken);
+    return ResponseEntity.ok().body(token);
+  }
 }

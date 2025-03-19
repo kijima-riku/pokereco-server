@@ -10,21 +10,20 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 public class SecurityConfig {
-    private final TokenRepository tokenRepository;
+  private final TokenRepository tokenRepository;
 
-    public SecurityConfig(final TokenRepository tokenRepository) {
-        this.tokenRepository = tokenRepository;
-    }
+  public SecurityConfig(final TokenRepository tokenRepository) {
+    this.tokenRepository = tokenRepository;
+  }
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/*").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .addFilterBefore(new TokenAuthenticationFilter(tokenRepository), UsernamePasswordAuthenticationFilter.class)
-                .build();
-    }
+  @Bean
+  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    return http.csrf(AbstractHttpConfigurer::disable)
+        .authorizeHttpRequests(
+            auth -> auth.requestMatchers("/api/v1/auth/*").permitAll().anyRequest().authenticated())
+        .addFilterBefore(
+            new TokenAuthenticationFilter(tokenRepository),
+            UsernamePasswordAuthenticationFilter.class)
+        .build();
+  }
 }

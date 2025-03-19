@@ -13,43 +13,47 @@ import java.util.UUID;
 
 @Service
 public class AuthService {
-    private final UserRepository userRepository;
-    private final TokenRepository tokenRepository;
+  private final UserRepository userRepository;
+  private final TokenRepository tokenRepository;
 
-    public AuthService(final UserRepository userRepository, final TokenRepository tokenRepository) {
-        this.userRepository = userRepository;
-        this.tokenRepository = tokenRepository;
+  public AuthService(final UserRepository userRepository, final TokenRepository tokenRepository) {
+    this.userRepository = userRepository;
+    this.tokenRepository = tokenRepository;
+  }
+
+  @Transactional
+  public SignInDto signIn() {
+    UUID userKey = UUID.randomUUID();
+    User user = new User(userKey);
+    userRepository.save(user);
+
+    UUID accessToken = UUID.randomUUID();
+    UUID refreshToken = UUID.randomUUID();
+
+    Token token = new Token(user, accessToken, refreshToken);
+    tokenRepository.save(token);
+
+    SignInDto response =
+        new SignInDto(token.getUser().getId(), token.getAccessToken(), token.getRefreshToken());
+
+    return response;
+  }
+
+  @Transactional
+  public SignInDto refreshToken(String refreshToken) {
+    Optional<Token> tokenOptional =
+        tokenRepository.findByRefreshToken(UUID.fromString(refreshToken));
+    if (tokenOptional.isEmpty()) {
+      throw new IllegalArgumentException("Invalid refresh token");
     }
-
-    @Transactional
-    public SignInDto signIn() {
-        UUID userKey = UUID.randomUUID();
-        User user = new User(userKey);
-        userRepository.save(user);
-
-        UUID accessToken = UUID.randomUUID();
-        UUID refreshToken = UUID.randomUUID();
-
-        Token token = new Token(user, accessToken, refreshToken);
-        tokenRepository.save(token);
-
-        SignInDto response  = new SignInDto(token.getUser().getId(), token.getAccessToken(), token.getRefreshToken());
-
-        return response;
-    }
-
-    @Transactional
-    public SignInDto refreshToken(String refreshToken) {
-        Optional<Token> tokenOptional = tokenRepository.findByRefreshToken(UUID.fromString(refreshToken));
-        if (tokenOptional.isEmpty()) {
-            throw new IllegalArgumentException("Invalid refresh token");
-        }
-        Token token = tokenOptional.get();
-        final UUID newAccessToken = UUID.randomUUID();
-        final UUID newRefreshToken = UUID.randomUUID();
-        Token newToken = new Token(token.getUser(), newAccessToken, newRefreshToken);
-        tokenRepository.save(newToken);
-        SignInDto response = new SignInDto(token.getUser().getId(), newToken.getAccessToken(), newToken.getRefreshToken());
-        return response;
-    }
+    Token token = tokenOptional.get();
+    final UUID newAccessToken = UUID.randomUUID();
+    final UUID newRefreshToken = UUID.randomUUID();
+    Token newToken = new Token(token.getUser(), newAccessToken, newRefreshToken);
+    tokenRepository.save(newToken);
+    SignInDto response =
+        new SignInDto(
+            token.getUser().getId(), newToken.getAccessToken(), newToken.getRefreshToken());
+    return response;
+  }
 }
