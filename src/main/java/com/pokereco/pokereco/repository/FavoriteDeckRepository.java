@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface FavoriteDeckRepository extends JpaRepository<FavoriteDeck, Integer> {
-    Optional<FavoriteDeck> findByUserId(Long usrId);
+  Optional<FavoriteDeck> findByUserId(Long usrId);
 }

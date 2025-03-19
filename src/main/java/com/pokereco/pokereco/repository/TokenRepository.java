@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface TokenRepository extends JpaRepository<Token, Long> {
-    Optional<Token> findByAccessToken(UUID accessToken);
-    Optional<Token> findByRefreshToken(UUID refreshToken);
+  Optional<Token> findByAccessToken(UUID accessToken);
 
+  Optional<Token> findByRefreshToken(UUID refreshToken);
 }

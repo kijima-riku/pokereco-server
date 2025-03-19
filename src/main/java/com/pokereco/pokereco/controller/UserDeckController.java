@@ -5,7 +5,10 @@ import com.pokereco.pokereco.dto.DeckDto;
 import com.pokereco.pokereco.dto.UserDeckRequestDto;
 import com.pokereco.pokereco.model.FavoriteDeck;
 import com.pokereco.pokereco.model.UserDeck;
+import com.pokereco.pokereco.responseBuilder.ResponseBuilder;
 import com.pokereco.pokereco.service.UserDeckService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,39 +19,90 @@ import java.util.Optional;
 @RequestMapping("/api/v1/user-decks")
 public class UserDeckController {
 
-    private final UserDeckService userDeckService;
+  private final UserDeckService userDeckService;
+  private final ResponseBuilder responseBuilder;
 
-    public UserDeckController(UserDeckService userDeckService) {
-        this.userDeckService = userDeckService;
-    }
+  public UserDeckController(
+      final UserDeckService userDeckService, final ResponseBuilder responseBuilder) {
+    this.userDeckService = userDeckService;
+    this.responseBuilder = responseBuilder;
+  }
 
-    @GetMapping
-    public List<DeckDto> getUserDecks(@AuthenticationPrincipal CustomUserPrincipal principal) {
-        Long userId = principal.getUserId();
-        return userDeckService.getUserDecks(userId);
+  @GetMapping
+  public ResponseEntity<?> getUserDecks(@AuthenticationPrincipal CustomUserPrincipal principal) {
+    try {
+      Long userId = principal.getUserId();
+      List<DeckDto> decks = userDeckService.getUserDecks(userId);
+      if (!decks.isEmpty()) {
+        return responseBuilder.buildSuccessResponse(decks);
+      } else {
+        return responseBuilder.buildErrorResponse(
+            "Registered user deck is not found.", HttpStatus.NOT_FOUND);
+      }
+    } catch (Exception e) {
+      return responseBuilder.buildErrorResponse(
+          "An unexpected error occurred.", HttpStatus.INTERNAL_SERVER_ERROR);
     }
+  }
 
-    @PostMapping
-    public UserDeck addUserDeck(@AuthenticationPrincipal CustomUserPrincipal principal , @RequestBody UserDeckRequestDto dto) {
-        Long userId = principal.getUserId();
-        return userDeckService.addUserDeck(userId, dto.getDeckId());
+  @PostMapping
+  public ResponseEntity<?> addUserDeck(
+      @AuthenticationPrincipal CustomUserPrincipal principal, @RequestBody UserDeckRequestDto dto) {
+    try {
+      Long userId = principal.getUserId();
+      UserDeck newDeck = userDeckService.addUserDeck(userId, dto.getDeckId());
+      return responseBuilder.buildSuccessResponse(newDeck);
+    } catch (IllegalArgumentException e) {
+      return responseBuilder.buildErrorResponse(e.getMessage(), HttpStatus.CONFLICT);
+    } catch (Exception e) {
+      return responseBuilder.buildErrorResponse(
+          "An unexpected error occurred.", HttpStatus.INTERNAL_SERVER_ERROR);
     }
+  }
 
-    @GetMapping("/favorite")
-    public Optional<FavoriteDeck> getFavoriteDeck(@AuthenticationPrincipal CustomUserPrincipal principal){
-        Long userId = principal.getUserId();
-        return userDeckService.getFavoriteDeck(userId);
+  @GetMapping("/favorite")
+  public ResponseEntity<?> getFavoriteDeck(@AuthenticationPrincipal CustomUserPrincipal principal) {
+    try {
+      Long userId = principal.getUserId();
+      Optional<FavoriteDeck> favoriteDeck = userDeckService.getFavoriteDeck(userId);
+      if (favoriteDeck.isPresent()) {
+        return responseBuilder.buildSuccessResponse(favoriteDeck);
+      } else {
+        return responseBuilder.buildErrorResponse(
+            "favorite deck is not found.", HttpStatus.NOT_FOUND);
+      }
+    } catch (Exception e) {
+      return responseBuilder.buildErrorResponse(
+          "An unexpected error occurred.", HttpStatus.INTERNAL_SERVER_ERROR);
     }
+  }
 
-    @PatchMapping("/favorite")
-    public FavoriteDeck setFavoriteDeck(@AuthenticationPrincipal CustomUserPrincipal principal, @RequestBody UserDeckRequestDto dto) {
-        Long userId = principal.getUserId();
-        return userDeckService.setFavoriteDeck(userId, dto.getDeckId());
+  @PatchMapping("/favorite")
+  public ResponseEntity<?> setFavoriteDeck(
+      @AuthenticationPrincipal CustomUserPrincipal principal, @RequestBody UserDeckRequestDto dto) {
+    try {
+      Long userId = principal.getUserId();
+      FavoriteDeck favoriteDeck = userDeckService.setFavoriteDeck(userId, dto.getDeckId());
+      return responseBuilder.buildSuccessResponse(favoriteDeck);
+    } catch (Exception e) {
+      return responseBuilder.buildErrorResponse(
+          "An unexpected error occurred.", HttpStatus.INTERNAL_SERVER_ERROR);
     }
+  }
 
-    @DeleteMapping("/{deckId}")
-    public void deleteUserDeck(@AuthenticationPrincipal CustomUserPrincipal principal, @PathVariable("deckId") Integer deckId) {
-        Long userId = principal.getUserId();
-        userDeckService.removeUserDeck(userId, deckId);
+  @DeleteMapping("/{deckId}")
+  public ResponseEntity<?> deleteUserDeck(
+      @AuthenticationPrincipal CustomUserPrincipal principal,
+      @PathVariable("deckId") Integer deckId) {
+    try {
+      Long userId = principal.getUserId();
+      userDeckService.removeUserDeck(userId, deckId);
+      return responseBuilder.buildSuccessResponse("User deck deleted successfully.");
+    } catch (IllegalArgumentException e) {
+      return responseBuilder.buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
+    } catch (Exception e) {
+      return responseBuilder.buildErrorResponse(
+          "An unexpected error occurred.", HttpStatus.INTERNAL_SERVER_ERROR);
     }
+  }
 }
