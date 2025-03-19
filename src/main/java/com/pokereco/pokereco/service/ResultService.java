@@ -80,21 +80,19 @@ public class ResultService {
                     .map(p -> (p - 1) * request.getLimit())
                     .orElse(0))
             .fetch();
-    final List<MatchDto> response =
-        resultModels.stream()
-            .map(
-                r ->
-                    new MatchDto(
-                        r.getId(),
-                        r.getUser().getId(),
-                        r.getMyDeck(),
-                        r.getOpponentDeck(),
-                        r.isFirst(),
-                        r.getTurnCount(),
-                        r.getOutcome(),
-                        r.getCreatedAt()))
-            .toList();
-    return response;
+    return resultModels.stream()
+        .map(
+            r ->
+                new MatchDto(
+                    r.getId(),
+                    r.getUser().getId(),
+                    r.getMyDeck(),
+                    r.getOpponentDeck(),
+                    r.isFirst(),
+                    r.getTurnCount(),
+                    r.getOutcome(),
+                    r.getCreatedAt()))
+        .toList();
   }
 
   public List<ResultDeckStatsDto> getDeckStats(Long userId) {

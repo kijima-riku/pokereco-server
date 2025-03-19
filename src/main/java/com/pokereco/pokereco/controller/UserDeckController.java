@@ -33,7 +33,12 @@ public class UserDeckController {
     try {
       Long userId = principal.getUserId();
       List<DeckDto> decks = userDeckService.getUserDecks(userId);
-      return responseBuilder.buildSuccessResponse(decks);
+      if (!decks.isEmpty()) {
+        return responseBuilder.buildSuccessResponse(decks);
+      } else {
+        return responseBuilder.buildErrorResponse(
+            "Registered user deck is not found.", HttpStatus.NOT_FOUND);
+      }
     } catch (Exception e) {
       return responseBuilder.buildErrorResponse(
           "An unexpected error occurred.", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -47,6 +52,8 @@ public class UserDeckController {
       Long userId = principal.getUserId();
       UserDeck newDeck = userDeckService.addUserDeck(userId, dto.getDeckId());
       return responseBuilder.buildSuccessResponse(newDeck);
+    } catch (IllegalArgumentException e) {
+      return responseBuilder.buildErrorResponse(e.getMessage(), HttpStatus.CONFLICT);
     } catch (Exception e) {
       return responseBuilder.buildErrorResponse(
           "An unexpected error occurred.", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -91,6 +98,8 @@ public class UserDeckController {
       Long userId = principal.getUserId();
       userDeckService.removeUserDeck(userId, deckId);
       return responseBuilder.buildSuccessResponse("User deck deleted successfully.");
+    } catch (IllegalArgumentException e) {
+      return responseBuilder.buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
     } catch (Exception e) {
       return responseBuilder.buildErrorResponse(
           "An unexpected error occurred.", HttpStatus.INTERNAL_SERVER_ERROR);

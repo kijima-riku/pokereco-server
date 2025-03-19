@@ -10,7 +10,6 @@ import java.util.LinkedHashMap;
 @Component
 public class ResponseBuilder {
 
-  // 成功レスポンス
   public <T> ResponseEntity<Map<String, Object>> buildSuccessResponse(T data) {
     Map<String, Object> responseBody = new LinkedHashMap<>();
     responseBody.put("data", data);
@@ -18,7 +17,6 @@ public class ResponseBuilder {
     return new ResponseEntity<>(responseBody, HttpStatus.OK);
   }
 
-  // エラーレスポンス
   public ResponseEntity<Map<String, Object>> buildErrorResponse(String message, HttpStatus status) {
     Map<String, Object> responseBody = new LinkedHashMap<>();
     responseBody.put("message", message);

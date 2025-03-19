@@ -38,6 +38,11 @@ public class UserDeckService {
   }
 
   public UserDeck addUserDeck(Long userId, Integer deckId) {
+    Optional<UserDeck> existing = userDeckRepository.findByUserIdAndDeckId(userId, deckId);
+    if (existing.isPresent()) {
+      throw new IllegalArgumentException(
+          "The deck (ID: " + deckId + ") is already registered for the user.");
+    }
     UserDeck userDeck = new UserDeck(userId, deckId);
     return userDeckRepository.save(userDeck);
   }
@@ -61,6 +66,10 @@ public class UserDeckService {
   @Transactional
   public void removeUserDeck(Long userId, Integer deckId) {
     Optional<UserDeck> userDeck = userDeckRepository.findByUserIdAndDeckId(userId, deckId);
-    userDeck.ifPresent(userDeckRepository::delete);
+    if (userDeck.isEmpty()) {
+      throw new IllegalArgumentException(
+          "The deck (ID: " + deckId + ") is not registered for the user.");
+    }
+    userDeckRepository.delete(userDeck.get());
   }
 }
