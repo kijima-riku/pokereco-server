@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   service_postgres:
     image: postgres:15.6
@@ -34,6 +36,20 @@ services:
     depends_on:
       service_postgres:
         condition: service_healthy
+    networks:
+      - pokereco-network
+
+  nginx:
+    image: nginx:latest
+    container_name: pokereco-nginx
+    ports:
+      - "3000:3000"  # ブラウザからは https://localhost:3000 でアクセス
+    volumes:
+      # プロジェクトルートの nginx.conf をコンテナ内の設定ファイルにマウント
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      # mkcert などで生成した証明書を格納するディレクトリ（例：certs/）をマウント
+      - ./certs:/etc/nginx/certs:ro
+    # ホスト側の API サーバーへアクセスするため、ネットワークはデフォルトで OK （host.docker.internal を利用）
     networks:
       - pokereco-network
 
