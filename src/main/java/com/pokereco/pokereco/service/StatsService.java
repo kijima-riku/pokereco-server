@@ -1,114 +1,85 @@
 package com.pokereco.pokereco.service;
 
-import com.pokereco.pokereco.dto.DeckStatsResponseDto;
-import com.pokereco.pokereco.dto.OverAllStatsResponseDto;
-import com.pokereco.pokereco.dto.ResultPostRequestDto;
-import com.pokereco.pokereco.dto.ResultPostResponseDto;
-import com.pokereco.pokereco.dto.OverAllStatsRequestDto;
-import com.pokereco.pokereco.model.Deck;
+import com.pokereco.pokereco.dto.request.DeckStatsRequestDto;
+import com.pokereco.pokereco.dto.request.OverAllStatsRequestDto;
+import com.pokereco.pokereco.dto.response.DeckStatsResponseDto;
+import com.pokereco.pokereco.dto.response.OverAllStatsResponseDto;
 import com.pokereco.pokereco.model.QResult;
-import com.pokereco.pokereco.model.Result;
-import com.pokereco.pokereco.model.User;
-import com.pokereco.pokereco.repository.DeckRepository;
-import com.pokereco.pokereco.repository.ResultRepository;
-import com.pokereco.pokereco.repository.UserRepository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import org.springframework.stereotype.Service;
 
 @Service
 public class StatsService {
   private final JPAQueryFactory jpaQueryFactory;
-  private final ResultRepository resultRepository;
-  private final DeckRepository deckRepository;
-  private final UserRepository userRepository;
   private final short OUTCOME_WIN = 1;
 
-  StatsService(
-      final JPAQueryFactory jpaQueryFactory,
-      final ResultRepository resultRepository,
-      final DeckRepository deckRepository,
-      final UserRepository userRepository) {
+  StatsService(final JPAQueryFactory jpaQueryFactory) {
     this.jpaQueryFactory = jpaQueryFactory;
-    this.resultRepository = resultRepository;
-    this.deckRepository = deckRepository;
-    this.userRepository = userRepository;
   }
 
-  public List<DeckStatsResponseDto> getDeckStats(Long userId) {
-    return getDeckStatsQuery(userId, false);
-  }
-
-  public OverAllStatsResponseDto getOverallStats(Long userId, OverAllStatsRequestDto request) {
+  public List<DeckStatsResponseDto> getDeckStats(
+      final Long userId, final DeckStatsRequestDto request) {
     final QResult qr = QResult.result;
     final BooleanBuilder predicate = new BooleanBuilder();
     predicate.and(qr.user.id.eq(userId));
 
-    if (request.deckId() != null) {
-      Optional<Deck> myDeck = deckRepository.findById(request.deckId());
-      myDeck.ifPresent(deck -> predicate.and(qr.myDeck.eq(deck)));
+    if (request.isFirst() != null) {
+      predicate.and(qr.isFirst.eq(request.isFirst()));
     }
-    if (request.opponentDeckId() != null) {
-      Optional<Deck> opponentDeck = deckRepository.findById(request.opponentDeckId());
-      opponentDeck.ifPresent(deck -> predicate.and(qr.opponentDeck.eq(deck)));
+
+    if (request.startDate() != null) {
+      predicate.and(qr.createdAt.goe(request.startDate()));
     }
-    if (request.outcome() != null) {
-      predicate.and(qr.outcome.eq(request.outcome()));
+
+    if (request.endDate() != null) {
+      predicate.and(qr.createdAt.loe(request.endDate()));
     }
+
+    final List<Tuple> results =
+        jpaQueryFactory
+            .select(
+                qr.myDeck.id,
+                qr.id.count(),
+                qr.outcome.when(OUTCOME_WIN).then(1L).otherwise(0L).sum())
+            .from(qr)
+            .where(predicate)
+            .groupBy(qr.myDeck.id)
+            .fetch();
+
+    final List<DeckStatsResponseDto> response = new ArrayList<>();
+    for (Tuple record : results) {
+      final Integer deckId = record.get(qr.myDeck.id);
+      Long totalMatches = record.get(qr.id.count());
+      Long totalWins = record.get(qr.outcome.when((short) 1).then(1L).otherwise(0L).sum());
+      totalMatches = (totalMatches != null) ? totalMatches : 0L;
+      totalWins = (totalWins != null) ? totalWins : 0L;
+      double winRate = (totalMatches > 0 ? ((double) totalWins / totalMatches) * 100 : 0.0);
+      response.add(new DeckStatsResponseDto(deckId, totalMatches, winRate));
+    }
+    return response;
+  }
+
+  public OverAllStatsResponseDto getOverallStats(
+      final Long userId, final OverAllStatsRequestDto request) {
+    final QResult qr = QResult.result;
+    final BooleanBuilder predicate = new BooleanBuilder();
+    predicate.and(qr.user.id.eq(userId));
+
     if (request.isFirst() != null) {
       predicate.and(qr.isFirst.eq(request.isFirst()));
     }
     if (request.startDate() != null) {
-      predicate.and(qr.createdAt.goe(LocalDate.parse(request.startDate()).atStartOfDay()));
+      predicate.and(qr.createdAt.goe(request.startDate()));
     }
     if (request.endDate() != null) {
-      predicate.and(qr.createdAt.loe(LocalDate.parse(request.endDate()).atTime(23, 59, 59)));
+      predicate.and(qr.createdAt.loe(request.endDate()));
     }
-    Tuple record =
-        jpaQueryFactory
-            .select(qr.id.count(), qr.outcome.when(OUTCOME_WIN).then(1L).otherwise(0L).sum())
-            .from(qr)
-            .where(qr.user.id.eq(userId))
-            .where(predicate)
-            .fetchOne();
-    Long totalMatches = record != null ? record.get(qr.id.count()) : 0L;
-    Long totalWins =
-        record != null ? record.get(qr.outcome.when((short) 1).then(1L).otherwise(0L).sum()) : 0L;
-    totalMatches = (totalMatches != null) ? totalMatches : 0L;
-    totalWins = (totalWins != null) ? totalWins : 0L;
-    double winRate = (totalMatches > 0 ? (double) totalWins / totalMatches : 0.0);
-    OverAllStatsResponseDto bestDeckStats = getBestWinRateDeck(userId);
-    return new OverAllStatsResponseDto(
-        totalMatches, winRate * 100, bestDeckStats.bestDeckId(), bestDeckStats.winRate());
-  }
 
-  public ResultPostResponseDto postResult(Long userId, ResultPostRequestDto request) {
-    User user = userRepository.getReferenceById(userId);
-    Deck myDeck = deckRepository.getReferenceById(request.myDeck());
-    Deck opponentDeck = deckRepository.getReferenceById(request.opponentDeck());
-
-    Result result =
-        new Result(
-            user, myDeck, opponentDeck, request.isFirst(), request.turnCount(), request.outcome());
-    Result savedResult = resultRepository.save(result);
-    return new ResultPostResponseDto(
-        savedResult.getId(),
-        savedResult.getMyDeck().getId(),
-        savedResult.getOpponentDeck().getId(),
-        savedResult.isFirst(),
-        savedResult.getTurnCount(),
-        savedResult.getOutcome());
-  }
-
-  private List<OverAllStatsResponseDto> getDeckStatsQuery(Long userId, boolean singleBestDeck) {
-    QResult qr = QResult.result;
     JPAQuery<Tuple> query =
         jpaQueryFactory
             .select(
@@ -116,38 +87,42 @@ public class StatsService {
                 qr.id.count(),
                 qr.outcome.when(OUTCOME_WIN).then(1L).otherwise(0L).sum())
             .from(qr)
-            .where(qr.user.id.eq(userId))
+            .where(predicate)
             .groupBy(qr.myDeck.id);
 
-    if (singleBestDeck) {
-      query.orderBy(
-          qr.outcome.when(OUTCOME_WIN).then(1L).otherwise(0L).sum().divide(qr.id.count()).desc());
+    if (request.limit() != null) {
+      query.limit(request.limit());
+      if (request.page() != null) {
+        query.offset((long) (request.page() - 1) * request.limit());
+      }
     }
     List<Tuple> deckStats = query.fetch();
 
-    List<DeckStatsResponseDto> response = new ArrayList<>();
+    long overallMatches = 0;
+    long overallWins = 0;
+    Integer bestDeckId = null;
+    double bestDeckWinRate = 0.0;
+    long bestDeckMatches = 0;
+
     for (Tuple record : deckStats) {
-      Integer deckId = record.get(qr.myDeck.id);
-      Long totalMatches = record.get(qr.id.count());
-      Long totalWins = record.get(qr.outcome.when((short) 1).then(1L).otherwise(0L).sum());
-      totalMatches = (totalMatches != null) ? totalMatches : 0L;
-      totalWins = (totalWins != null) ? totalWins : 0L;
-      double winRate = (totalMatches > 0 ? (double) totalWins / totalMatches * 100 : 0.0);
-      response.add(new DeckStatsResponseDto(deckId, totalMatches, winRate));
+      final Integer deckId = record.get(qr.myDeck.id);
+      final Long matches = record.get(qr.id.count());
+      final Long wins = record.get(qr.outcome.when((short) 1).then(1L).otherwise(0L).sum());
 
-      if (singleBestDeck) break;
-    }
-    return response;
-  }
+      overallMatches += matches;
+      overallWins += wins;
 
-  private OverAllStatsResponseDto getBestWinRateDeck(Long userId) {
-    List<OverAllStatsResponseDto> bestDeckStats = getDeckStatsQuery(userId, true);
-    if (bestDeckStats.isEmpty()) {
-      return new OverAllStatsResponseDto(0L, 0.0, null, 0.0);
-    } else {
-      OverAllStatsResponseDto dto = bestDeckStats.get(0);
-      return new OverAllStatsResponseDto(
-          dto.totalMatches(), dto.winRate(), dto.bestDeckId(), dto.winRate());
+      double deckWinRate = matches > 0 ? ((double) wins / matches) : 0.0;
+      if (deckWinRate > bestDeckWinRate) {
+        bestDeckWinRate = deckWinRate;
+        bestDeckId = deckId;
+        bestDeckMatches = matches;
+      }
     }
+
+    double overallWinRate = overallMatches > 0 ? ((double) overallWins / overallMatches) : 0.0;
+
+    return new OverAllStatsResponseDto(
+        overallMatches, overallWinRate, bestDeckId, bestDeckWinRate, bestDeckMatches);
   }
 }

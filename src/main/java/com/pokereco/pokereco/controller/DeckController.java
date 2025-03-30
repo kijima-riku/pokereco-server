@@ -1,7 +1,7 @@
 package com.pokereco.pokereco.controller;
 
 import com.pokereco.pokereco.dto.DeckDto;
-import com.pokereco.pokereco.dto.DeckRequestDto;
+import com.pokereco.pokereco.dto.request.DeckRequestDto;
 import com.pokereco.pokereco.responseBuilder.ResponseBuilder;
 import com.pokereco.pokereco.service.DeckService;
 import org.springframework.http.ResponseEntity;

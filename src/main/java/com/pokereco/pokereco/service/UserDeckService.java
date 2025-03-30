@@ -1,8 +1,8 @@
 package com.pokereco.pokereco.service;
 
 import com.pokereco.pokereco.dto.DeckDto;
-import com.pokereco.pokereco.dto.FavoriteDeckResponseDto;
-import com.pokereco.pokereco.dto.UserDeckResponseDto;
+import com.pokereco.pokereco.dto.response.FavoriteDeckResponseDto;
+import com.pokereco.pokereco.dto.response.UserDeckResponseDto;
 import com.pokereco.pokereco.model.Deck;
 import com.pokereco.pokereco.model.FavoriteDeck;
 import com.pokereco.pokereco.model.UserDeck;

@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 
 public record MatchDto(
     long id,
-    long userId,
     Deck myDeck,
     Deck opponentDeck,
     boolean isFirst,

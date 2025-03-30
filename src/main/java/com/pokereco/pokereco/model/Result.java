@@ -1,10 +1,9 @@
 package com.pokereco.pokereco.model;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "results")
@@ -42,6 +41,8 @@ public class Result {
   @UpdateTimestamp
   @Column(name = "updated_at")
   private LocalDateTime updatedAt;
+
+  public Result() {}
 
   public Result(
       User user, Deck myDeck, Deck opponentDeck, boolean isFirst, short turnCount, short outcome) {

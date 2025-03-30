@@ -2,7 +2,6 @@ package com.pokereco.pokereco.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -23,6 +22,8 @@ public class User {
 
   @Column(nullable = false)
   private LocalDateTime createdAt = LocalDateTime.now();
+
+  public User() {}
 
   public User(UUID userKey) {
     this.userKey = userKey;

@@ -1,7 +1,6 @@
 package com.pokereco.pokereco.model;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -24,6 +23,8 @@ public class Token {
 
   @Column(nullable = false)
   private LocalDateTime createdAt = LocalDateTime.now();
+
+  public Token() {}
 
   public Token(User user, UUID accessToken, UUID refreshToken) {
     this.user = user;

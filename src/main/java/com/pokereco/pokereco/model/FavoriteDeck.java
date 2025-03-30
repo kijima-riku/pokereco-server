@@ -1,10 +1,9 @@
 package com.pokereco.pokereco.model;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "favorite_decks")
@@ -26,6 +25,8 @@ public class FavoriteDeck {
   @UpdateTimestamp
   @Column(name = "updated_at", updatable = true)
   private LocalDateTime updatedAt;
+
+  public FavoriteDeck() {}
 
   public FavoriteDeck(Long userId, Integer deckId) {
     this.userId = userId;

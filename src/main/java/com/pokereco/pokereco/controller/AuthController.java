@@ -1,6 +1,6 @@
 package com.pokereco.pokereco.controller;
 
-import com.pokereco.pokereco.dto.SignInDto;
+import com.pokereco.pokereco.dto.response.AuthResponseDto;
 import com.pokereco.pokereco.responseBuilder.ResponseBuilder;
 import com.pokereco.pokereco.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,9 +16,9 @@ public class AuthController {
   private final AuthService authService;
   private final ResponseBuilder responseBuilder;
 
-  int ACCESS_TOKEN_EXPIRATION = 15 * 60;
-  //  int REFRESH_TOKEN_EXPIRATION = 90 * 24 * 60 * 60;
-  int REFRESH_TOKEN_EXPIRATION = 30 * 60;
+  static final int ACCESS_TOKEN_EXPIRATION = 15 * 60;
+  // static final  int REFRESH_TOKEN_EXPIRATION = 90 * 24 * 60 * 60;
+  static final int REFRESH_TOKEN_EXPIRATION = 30 * 60;
 
   private static final boolean LOCAL_HTTPONLY = false;
   private static final boolean LOCAL_SECURE = true;
@@ -29,11 +29,11 @@ public class AuthController {
   }
 
   @PostMapping("/signIn")
-  public ResponseEntity<?> signIn(HttpServletResponse response) {
+  public ResponseEntity<?> signIn(final HttpServletResponse response) {
     try {
-      SignInDto token = authService.signIn();
+      final AuthResponseDto token = authService.signIn();
 
-      ResponseCookie accessTokenCookie =
+      final ResponseCookie accessTokenCookie =
           ResponseCookie.from("accessToken", token.accessToken().toString())
               .httpOnly(LOCAL_HTTPONLY)
               .secure(LOCAL_SECURE)
@@ -43,7 +43,7 @@ public class AuthController {
               .build();
       response.addHeader("Set-Cookie", accessTokenCookie.toString());
 
-      ResponseCookie refreshTokenCookie =
+      final ResponseCookie refreshTokenCookie =
           ResponseCookie.from("refreshToken", token.refreshToken().toString())
               .httpOnly(LOCAL_HTTPONLY)
               .secure(LOCAL_SECURE)
@@ -54,14 +54,15 @@ public class AuthController {
       response.addHeader("Set-Cookie", refreshTokenCookie.toString());
 
       return responseBuilder.buildSuccessResponse(token);
-    } catch (Exception e) {
+    } catch (final Exception e) {
       return responseBuilder.buildErrorResponse(
           "Failed to sign in: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   @PostMapping("/refresh")
-  public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
+  public ResponseEntity<?> refreshToken(
+      final HttpServletRequest request, final HttpServletResponse response) {
     String refreshToken = null;
     if (request.getCookies() != null) {
       for (var cookie : request.getCookies()) {
@@ -77,7 +78,7 @@ public class AuthController {
     }
 
     try {
-      SignInDto token = authService.refreshToken(refreshToken);
+      AuthResponseDto token = authService.refreshToken(refreshToken);
 
       ResponseCookie accessTokenCookie =
           ResponseCookie.from("accessToken", token.accessToken().toString())

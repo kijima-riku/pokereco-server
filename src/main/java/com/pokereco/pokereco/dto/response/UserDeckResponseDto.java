@@ -1,4 +1,4 @@
-package com.pokereco.pokereco.dto;
+package com.pokereco.pokereco.dto.response;
 
 import java.time.LocalDateTime;
 

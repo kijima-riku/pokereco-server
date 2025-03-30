@@ -1,4 +1,4 @@
-package com.pokereco.pokereco.dto;
+package com.pokereco.pokereco.dto.request;
 
 import jakarta.annotation.Nullable;
 

@@ -21,6 +21,8 @@ public class UserDeck {
   @Column(name = "created_at", updatable = false)
   private LocalDateTime createdAt;
 
+  public UserDeck() {}
+
   public UserDeck(Long userId, Integer deckId) {
     this.userId = userId;
     this.deckId = deckId;

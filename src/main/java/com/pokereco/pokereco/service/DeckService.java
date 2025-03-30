@@ -1,7 +1,7 @@
 package com.pokereco.pokereco.service;
 
 import com.pokereco.pokereco.dto.DeckDto;
-import com.pokereco.pokereco.dto.DeckRequestDto;
+import com.pokereco.pokereco.dto.request.DeckRequestDto;
 import com.pokereco.pokereco.model.Deck;
 import com.pokereco.pokereco.repository.DeckRepository;
 import org.springframework.stereotype.Service;
@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 public class DeckService {
   private DeckRepository decksRepository;
 
-   DeckService(final DeckRepository decksRepository) {
+  DeckService(final DeckRepository decksRepository) {
     this.decksRepository = decksRepository;
   }
 
