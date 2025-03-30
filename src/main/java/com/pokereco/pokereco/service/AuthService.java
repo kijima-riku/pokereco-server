@@ -16,7 +16,7 @@ public class AuthService {
   private final UserRepository userRepository;
   private final TokenRepository tokenRepository;
 
-  public AuthService(final UserRepository userRepository, final TokenRepository tokenRepository) {
+  AuthService(final UserRepository userRepository, final TokenRepository tokenRepository) {
     this.userRepository = userRepository;
     this.tokenRepository = tokenRepository;
   }

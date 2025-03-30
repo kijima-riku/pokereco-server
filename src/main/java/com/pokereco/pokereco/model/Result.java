@@ -43,8 +43,6 @@ public class Result {
   @Column(name = "updated_at")
   private LocalDateTime updatedAt;
 
-  public Result() {}
-
   public Result(
       User user, Deck myDeck, Deck opponentDeck, boolean isFirst, short turnCount, short outcome) {
     this.user = user;

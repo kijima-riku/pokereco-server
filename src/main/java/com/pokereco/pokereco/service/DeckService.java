@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 public class DeckService {
   private DeckRepository decksRepository;
 
-  public DeckService(final DeckRepository decksRepository) {
+   DeckService(final DeckRepository decksRepository) {
     this.decksRepository = decksRepository;
   }
 
@@ -25,7 +25,7 @@ public class DeckService {
   }
 
   public DeckDto createDeck(final DeckRequestDto request) {
-    Deck newDeck = new Deck(request.getMainName(), request.getSubName());
+    Deck newDeck = new Deck(request.mainName(), request.subName());
     Deck deck = decksRepository.save(newDeck);
     return new DeckDto(deck.getId(), deck.getMainName(), deck.getSubName());
   }

@@ -15,7 +15,7 @@ public class DeckController {
   private final DeckService deckService;
   private final ResponseBuilder responseBuilder;
 
-  public DeckController(final DeckService deckService, final ResponseBuilder responseBuilder) {
+  DeckController(final DeckService deckService, final ResponseBuilder responseBuilder) {
     this.deckService = deckService;
     this.responseBuilder = responseBuilder;
   }

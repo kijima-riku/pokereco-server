@@ -27,8 +27,6 @@ public class FavoriteDeck {
   @Column(name = "updated_at", updatable = true)
   private LocalDateTime updatedAt;
 
-  public FavoriteDeck() {}
-
   public FavoriteDeck(Long userId, Integer deckId) {
     this.userId = userId;
     this.deckId = deckId;

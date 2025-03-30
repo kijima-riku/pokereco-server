@@ -25,8 +25,6 @@ public class Token {
   @Column(nullable = false)
   private LocalDateTime createdAt = LocalDateTime.now();
 
-  public Token() {}
-
   public Token(User user, UUID accessToken, UUID refreshToken) {
     this.user = user;
     this.accessToken = accessToken;

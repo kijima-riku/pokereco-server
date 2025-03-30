@@ -22,8 +22,6 @@ public class Deck {
   @Column(name = "created_at", updatable = false)
   private LocalDateTime createdAt;
 
-  public Deck() {}
-
   public Deck(final String mainName, final String subName) {
     this.mainName = mainName;
     this.subName = subName;

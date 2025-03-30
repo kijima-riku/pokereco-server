@@ -24,8 +24,6 @@ public class User {
   @Column(nullable = false)
   private LocalDateTime createdAt = LocalDateTime.now();
 
-  public User() {}
-
   public User(UUID userKey) {
     this.userKey = userKey;
   }
