@@ -1,28 +1,27 @@
 package com.pokereco.pokereco.service;
 
-import com.pokereco.pokereco.dto.SignInDto;
+import com.pokereco.pokereco.dto.response.AuthResponseDto;
 import com.pokereco.pokereco.model.Token;
 import com.pokereco.pokereco.model.User;
 import com.pokereco.pokereco.repository.TokenRepository;
 import com.pokereco.pokereco.repository.UserRepository;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AuthService {
   private final UserRepository userRepository;
   private final TokenRepository tokenRepository;
 
-  public AuthService(final UserRepository userRepository, final TokenRepository tokenRepository) {
+  AuthService(final UserRepository userRepository, final TokenRepository tokenRepository) {
     this.userRepository = userRepository;
     this.tokenRepository = tokenRepository;
   }
 
   @Transactional
-  public SignInDto signIn() {
+  public AuthResponseDto signIn() {
     UUID userKey = UUID.randomUUID();
     User user = new User(userKey);
     userRepository.save(user);
@@ -33,11 +32,12 @@ public class AuthService {
     Token token = new Token(user, accessToken, refreshToken);
     tokenRepository.save(token);
 
-    return new SignInDto(token.getUser().getId(), token.getAccessToken(), token.getRefreshToken());
+    return new AuthResponseDto(
+        token.getUser().getId(), token.getAccessToken(), token.getRefreshToken());
   }
 
   @Transactional
-  public SignInDto refreshToken(String refreshToken) {
+  public AuthResponseDto refreshToken(String refreshToken) {
     Optional<Token> tokenOptional =
         tokenRepository.findByRefreshToken(UUID.fromString(refreshToken));
     if (tokenOptional.isEmpty()) {
@@ -48,7 +48,7 @@ public class AuthService {
     final UUID newRefreshToken = UUID.randomUUID();
     Token newToken = new Token(token.getUser(), newAccessToken, newRefreshToken);
     tokenRepository.save(newToken);
-    return new SignInDto(
+    return new AuthResponseDto(
         token.getUser().getId(), newToken.getAccessToken(), newToken.getRefreshToken());
   }
 }

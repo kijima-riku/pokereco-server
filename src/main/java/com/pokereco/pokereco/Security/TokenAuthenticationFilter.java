@@ -42,8 +42,6 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
     UUID accessToken = getAccessTokenFromCookie(request);
     if (accessToken == null) {
-      System.out.println("access_toekn" + accessToken);
-      System.out.println(request);
       writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "invalid token.");
       return;
     }

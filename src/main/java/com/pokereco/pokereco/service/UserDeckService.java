@@ -1,14 +1,14 @@
 package com.pokereco.pokereco.service;
 
 import com.pokereco.pokereco.dto.DeckDto;
+import com.pokereco.pokereco.dto.response.FavoriteDeckResponseDto;
+import com.pokereco.pokereco.dto.response.UserDeckResponseDto;
 import com.pokereco.pokereco.model.Deck;
 import com.pokereco.pokereco.model.FavoriteDeck;
-import com.pokereco.pokereco.model.User;
 import com.pokereco.pokereco.model.UserDeck;
 import com.pokereco.pokereco.repository.DeckRepository;
 import com.pokereco.pokereco.repository.FavoriteDeckRepository;
 import com.pokereco.pokereco.repository.UserDeckRepository;
-import java.util.Date;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +21,7 @@ public class UserDeckService {
   private final DeckRepository deckRepository;
   private final FavoriteDeckRepository favoriteDeckRepository;
 
-  public UserDeckService(
+  UserDeckService(
       UserDeckRepository userDeckRepository,
       DeckRepository deckRepository,
       FavoriteDeckRepository favoriteDeckRepository) {
@@ -39,20 +39,26 @@ public class UserDeckService {
         .toList();
   }
 
-  public UserDeck addUserDeck(Long userId, Integer deckId) {
+  public UserDeckResponseDto addUserDeck(Long userId, Integer deckId) {
     Optional<UserDeck> existing = userDeckRepository.findByUserIdAndDeckId(userId, deckId);
     if (existing.isPresent()) {
       throw new IllegalArgumentException(
           "The deck (ID: " + deckId + ") is already registered for the user.");
     }
     UserDeck userDeck = new UserDeck(userId, deckId);
-    return userDeckRepository.save(userDeck);
+    final UserDeck added = userDeckRepository.save(userDeck);
+    return new UserDeckResponseDto(added.getDeckId(), added.getCreatedAt());
   }
 
-  public Optional<FavoriteDeck> getFavoriteDeck(Long userId) {
-    return favoriteDeckRepository.findByUserId(userId);
+  public List<FavoriteDeckResponseDto> getFavoriteDeck(Long userId) {
+    final List<FavoriteDeck> favoriteDeck = favoriteDeckRepository.getFavoriteDecksByUserId(userId);
+    if (favoriteDeck.isEmpty()) {
+      throw new IllegalArgumentException("favorite deck is not found.");
+    }
+    return favoriteDeck.stream().map(id -> new FavoriteDeckResponseDto(id.getDeckId())).toList();
   }
 
+  // ここのロジック
   public FavoriteDeck setFavoriteDeck(Long userId, Integer deckId) {
     Optional<FavoriteDeck> favoriteDeck = favoriteDeckRepository.findByUserId(userId);
     if (favoriteDeck.isPresent()) {
